@@ -1,6 +1,6 @@
 # serverless-s3-object-lambda
 
-A practical example of using AWS S3 Object Lambda to watermark an image with meta data on the fly using Amazon Rekognition and AWS S3 Object Lambda, based on the following blog post [Serverless S3 Object Lambda 🚀](/)
+A practical example of using AWS S3 Object Lambda to watermark an image with meta data on the fly using Amazon Rekognition and AWS S3 Object Lambda, based on the following blog post [Serverless S3 Object Lambda 🚀](https://leejamesgilmore.medium.com/serverless-s3-object-lambda-88c923a8a771)
 
 ## Introduction
 
