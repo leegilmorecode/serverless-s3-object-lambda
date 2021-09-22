@@ -1,0 +1,29 @@
+{
+  "info": {
+    "_postman_id": "8264cb24-0aea-4154-a34b-d37e923e2ac8",
+    "name": "serverless-s3-object-lambda",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "get image",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://{{url}}/dev/images/3",
+          "protocol": "https",
+          "host": ["{{url}}"],
+          "path": ["dev", "images", "3"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "something.execute-api.eu-west-1.amazonaws.com"
+    }
+  ]
+}

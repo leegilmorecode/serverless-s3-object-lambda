@@ -1,0 +1,120 @@
+service: image-metadata
+variablesResolutionMode: 20210326
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  memorySize: 128
+  stage: ${opt:stage, 'dev'}
+  region: 'eu-west-1'
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3-object-lambda:WriteGetObjectResponse
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:ListBucket
+          Resource:
+            - !GetAtt AssetsBucket.Arn
+            - !Join ['/', [{ Fn::GetAtt: [AssetsBucket, Arn] }, '*']]
+        - Effect: 'Allow'
+          Action:
+            - 's3-object-lambda:Get*'
+            - 's3-object-lambda:List*'
+          Resource: ${self:custom.s3AccessPointArn}
+        - Effect: 'Allow'
+          Action:
+            - 's3:*'
+          Resource: ${self:custom.accessPointArn}/*
+        - Effect: 'Allow'
+          Action:
+            - 'lambda:InvokeFunction'
+          Resource: ${self:custom.generateImageLambdaArn}
+        - Effect: Allow
+          Action:
+            - s3-object-lambda:WriteGetObjectResponse
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - rekognition:DetectLabels
+          Resource: '*'
+  apiGateway:
+    shouldStartNameWithService: true
+plugins:
+  - serverless-webpack # build our serverless solution
+  - serverless-s3-remover # remove files from bucket on sls remove
+  - serverless-s3-sync # sync our local assets folder with the s3 bucket
+package:
+  individually: true
+  exclude:
+    - node_modules/** # exclude the node modules
+functions:
+  GetImage:
+    handler: ./src/get-image/get-image.handler
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+      S3_ACCESS_POINT: ${self:custom.s3AccessPointArn}
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    memorySize: 512
+    timeout: 3
+    # this is the api gateway integration with our lambda function
+    events:
+      - http:
+          path: /images/{id}
+          method: get
+  GenerateImage:
+    handler: ./src/generate-image/generate-image.handler
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    memorySize: 2048
+    timeout: 3
+resources:
+  Resources:
+    # create the assets bucket for our images
+    AssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+    # create the access point for the S3 bucket
+    BucketAccessPoint:
+      Type: AWS::S3::AccessPoint
+      Properties:
+        Bucket: !Ref AssetsBucket
+        Name: ${self:custom.bucketName}-ap
+    # create the lambda access point to retrieve the images
+    LambdaAccessPoint:
+      Type: AWS::S3ObjectLambda::AccessPoint
+      Properties:
+        Name: ${self:custom.bucketName}-lambda-lap
+        ObjectLambdaConfiguration:
+          CloudWatchMetricsEnabled: true
+          SupportingAccessPoint: ${self:custom.accessPointArn}
+          TransformationConfigurations:
+            - Actions: ['GetObject']
+              ContentTransformation:
+                AwsLambda:
+                  FunctionArn: !GetAtt GenerateImageLambdaFunction.Arn
+custom:
+  bucketName: image-meta-${self:provider.stage}
+  s3AccessPointArn: arn:aws:s3-object-lambda:${self:provider.region}:${aws:accountId}:accesspoint/${self:custom.bucketName}-lambda-lap
+  accessPointArn: arn:aws:s3:${self:provider.region}:${aws:accountId}:accesspoint/image-meta-${self:provider.stage}-ap
+  generateImageLambdaArn: arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:image-metadata-${self:provider.stage}-GenerateImage
+  # s3-remover config
+  remover:
+    buckets:
+      - ${self:custom.bucketName}
+  # this is the config for the s3sync plugin which will move all assets from src/assets into the s3 bucket
+  s3Sync:
+    - bucketName: ${self:custom.bucketName}
+      localDir: src/assets
+  # webpack config
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules:
+      forceExclude:
+        - aws-sdk

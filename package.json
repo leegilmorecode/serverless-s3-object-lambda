@@ -1,0 +1,49 @@
+{
+  "name": "serverless-s3-object-lambda",
+  "version": "1.0.0",
+  "description": "A practical example of using AWS S3 Object Lambda to watermark an image with meta data on the fly using Amazon Rekognition and AWS S3 Object Lambda",
+  "main": "index.ts",
+  "scripts": {
+    "prettier": "npx prettier --write .",
+    "deploy:develop": "sls deploy",
+    "package:develop": "sls package",
+    "remove:develop": "sls remove"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leegilmorecode/serverless-s3-object-lambda.git"
+  },
+  "author": "Lee Gilmore",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leegilmorecode/serverless-s3-object-lambda/issues"
+  },
+  "homepage": "https://github.com/leegilmorecode/serverless-s3-object-lambda#readme",
+  "devDependencies": {
+    "@jimp/types": "^0.16.1",
+    "@types/aws-lambda": "^8.10.83",
+    "@types/node": "^16.9.4",
+    "@types/uuid": "^8.3.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "fork-ts-checker-webpack-plugin": "^6.3.3",
+    "prettier": "^2.4.1",
+    "serverless": "^2.59.0",
+    "serverless-s3-remover": "^0.6.0",
+    "serverless-s3-sync": "^1.17.1",
+    "serverless-webpack": "^5.5.4",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.53.0",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.991.0",
+    "axios": "^0.21.4",
+    "jimp": "^0.16.1",
+    "uuid": "^8.3.2"
+  }
+}
